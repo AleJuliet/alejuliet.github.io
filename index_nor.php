@@ -1,0 +1,545 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link rel="stylesheet" href="style.css?v=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="d3/d3.js"></script> 
+
+</head>
+
+<body>
+   <div id="container" style="text-align:center;margin-top:30px">
+    <div id="container2" style="width:50%;margin-left: 25%;margin-right: 2%;">
+        <h5>Please select the outfits you like</h5>
+        <div id="top" style="margin-top:20px">
+            <img id="topim" src="" data-idn="" height="200">
+        </div>
+        <div id="pants">
+            <img id="pantim" src="" data-idn="" height="200">
+        </div>
+        
+        <div class="row" style="margin-top:30px">
+            <div class="col-sm" style="text-align:right">
+            <button id="dontlike" type="button" onclick="selectn(0)" class="btn btn-danger">I don't like it</button>
+            </div>
+            <div class="col-sm" style="text-align:left">
+            <button id="melike" type="button" onclick="selectn(1)" class="btn btn-success">I like it</button>
+            </div>
+        </div>
+        
+        <div id="end">
+            <button type="button" onclick="endtest()" class="btn btn-success">End Test</button>
+        </div>
+     </div>
+    </div>
+
+  <script>
+    /*Load data
+    * Remember:
+    * color = index 1
+    * patter = index 2
+    * occassion = index 3
+    * type = index 5
+    */
+    var tops = [];
+    var pants = [];
+    var topsids = {};
+    var pantsids = {};
+    var matchDict = {};    
+    var counter = 0;
+    var lastlikedtop = "";
+    var lastlikepant = "";
+    //patternScore = zeros((5,5));
+    patternScore = zeros([5,5]);
+    colorScore = zeros([8,8]);
+    occasionScore = zeros([2,2]);
+    
+    
+    var recordselection = [];
+    
+    
+    /*
+    * Here it loads the data and adds it to tops and pants
+    * topsids is a dictionary that contains "iditem" -> "arrayofelementsoftop"
+    * pantsids is a dictionary that contains "iditem" -> "arrayofelementsofpant"
+    */
+    d3.csv("4-Huayu-CSV.csv", function(data) {
+        data.forEach(function(d) {
+            if (d.type=="1") {
+                tops.push([d.index,d.color,d.pattern,d.occasion])
+                topsids[d.index] = [d.index,d.color,d.pattern,d.occasion,d.type];
+            }
+            else 
+                pants.push([d.index,d.color,d.pattern,d.occasion])
+                pantsids[d.index] = [d.index,d.color,d.pattern,d.occasion,d.type];
+        });
+        console.log(tops);
+        
+        dorandom(tops,pants);
+    });
+    
+    /**
+    * Shuffles array in place.
+    * @param {Array} a items An array containing the items.
+    */
+    function shuffle(a) {
+        var j, x, i;
+        for (i = a.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
+    }
+    
+    /*
+    * aux function
+    */
+    function zeros(dimensions) {
+        var array = [];
+
+        for (var i = 0; i < dimensions[0]; ++i) {
+            array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
+        }
+
+        return array;
+    }
+    
+    /*
+    * aux function to get random from array
+    */
+    function getRndmFromSet(set) {
+        var rndm = Math.floor(Math.random() * set.length);
+        console.log(" random nm "+rndm);
+        return set[rndm];
+    }
+    
+    /*
+    * Gets a random item (1 top or 2 pant) 
+    */
+    function dorandomitem() {
+        tops = shuffle(tops);
+        pants = shuffle(pants);
+        var returninfo = [];
+        var top_or_pant = shuffle([1,2]);
+        returninfo.push(top_or_pant[0]); 
+        if (returninfo[0] == 1)
+            returninfo.push(tops[0][0]);
+        else 
+            returninfo.push(pants[0][0]);
+        return returninfo;
+    }
+    
+    /*
+    * Gets a random match and ads it on the divs
+    */
+    function dorandom() {
+        tops = shuffle(tops);
+        pants = shuffle(pants);
+        var topID = tops[0][0];
+        var pantID = pants[0][0];
+        $("#topim").attr("src","clothes2/"+topID+".jpg");
+        $("#topim").attr("data-idn",topID);
+        $("#pantim").attr("src","clothes2/"+pantID+".jpg");
+        $("#pantim").attr("data-idn",pantID);
+        console.log(topID+" and "+pantID);
+    }
+        
+    /*
+    * Recommends based on previous like
+    */
+    function recommend(topId, pantID) {
+        var recomID_top = "",recomID_pant = "";
+        
+        var topxx = topsids[topId];
+        var pantxx = pantsids[pantID];
+    
+        var swiped_color_1 = topxx[1]
+        var swiped_color_2 = pantxx[1]
+        
+        var swiped_pattern_1 = topxx[2]
+        var swiped_pattern_2 = pantxx[2]
+        
+        var swiped_occasion_1 = topxx[3]
+        var swiped_occasion_2 = pantxx[3]
+        
+        var featured = "", featured2 = ""
+        
+        allmatches1c = []
+        allmatches2c = []
+        allmatches1p = []
+        allmatches2p = []
+        allmatches1o = []
+        allmatches2o = []
+        
+        //Get same colors
+        for (var i = 0; i < tops.length; i++) {
+            var top = tops[i];
+            if (top[1] == swiped_color_1)
+                allmatches1c.push(top[0])
+            if (top[2] == swiped_pattern_1 && topId!=top[0])
+                allmatches1p.push(top[0])
+            if (top[3] == swiped_occasion_1 && topId!=top[0])
+                allmatches1o.push(top[0])
+        }
+        
+        for (var i = 0; i < pants.length; i++) {
+            var pant = pants[i];
+            if (pant[1] == swiped_color_2)
+                allmatches2c.push(pant[0])
+            if (pant[2] == swiped_pattern_2 && pantID!=pant[0])
+                allmatches2p.push(pant[0])
+            if (pant[3] == swiped_occasion_1 && pantID!=pant[0])
+                allmatches2o.push(pant[0])
+        }
+        
+        if (allmatches2c.length<=1 && allmatches2p.length<=1 && allmatches2o.length<=1) {
+            var index = allmatches1c.indexOf(topId);
+            if (index > -1) {
+                allmatches1c.splice(index, 1);
+            }
+        }
+            
+        if (allmatches1c.length==0)
+            if (allmatches1p.length==0)
+                if (allmatches1o.length==0)
+                    recomID_top = ""
+                else {
+                    featured = "occassion";
+                    recomID_top = getRndmFromSet(allmatches1o);
+                }
+            else {
+                featured = "pattern";
+                recomID_top = getRndmFromSet(allmatches1p);
+            }
+        else {
+            featured = "color";
+            recomID_top = getRndmFromSet(allmatches1c);
+        }
+            
+        if (recomID_top == topId) {
+            var index = allmatches2c.indexOf(pantID);
+            if (index > -1) {
+                allmatches2c.splice(index, 1);
+            }
+        }
+            
+        if (allmatches2c.length==0)
+            if (allmatches2p.length==0)
+                if (allmatches2o.length==0) {
+                    recomID_pant = ""
+                    }
+                else {
+                    featured2 = "occassion";
+                    recomID_pant = getRndmFromSet(allmatches2o);
+                }
+            else {
+                featured2 = "pattern";
+                recomID_pant = getRndmFromSet(allmatches2p);
+            }
+        else {
+            featured2 = "color";
+            recomID_pant = getRndmFromSet(allmatches2c);
+        }
+        
+        if (recomID_pant == "" || recomID_top == "") {
+            dorandom();
+            console.log("Recommend: Did random");
+        }
+        else {
+            $("#topim").attr("src","clothes2/"+recomID_top+".jpg");
+            $("#topim").attr("data-idn",recomID_top);
+            $("#pantim").attr("src","clothes2/"+recomID_pant+".jpg");
+            $("#pantim").attr("data-idn",recomID_pant);
+            console.log("Recommend: not random");
+        }
+        
+    }
+    
+    /*
+    * Recommends based on probability (points)
+    */
+    function recommendbasedonprob() {
+        var my_List = [],  allMatch = [], allProb = [];
+        var match = "", march_Splited = [],rand = "";
+        
+        for (var key in matchDict) {
+            // check if the property/key is defined in the object itself, not in parent
+            if (matchDict.hasOwnProperty(key)) {    
+                for (var i = 0; i < parseInt(matchDict[key]); i++) {
+                    my_List.push(key);
+                }
+            }
+        }
+        
+        rand = getRndmFromSet(my_List);
+        
+        return rand;
+    }
+    
+    function indexOfMax(arr) {
+        if (arr.length === 0) {
+            return -1;
+        }
+
+        var max = arr[0];
+        var maxIndex = 0;
+
+        for (var i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                maxIndex = i;
+                max = arr[i];
+            }
+        }
+
+        return maxIndex;
+    }
+    
+    /*
+    * Recommend new item
+    */
+    function recommendbasedonnew(topnew,top_or_pant) {
+    
+        var rowColor = parseInt(colorScore[parseInt(topnew[1])-1]);
+        var match_color = indexOfMax(rowColor)+1;
+        
+        var rowPattern = parseInt(patternScore[parseInt(topnew[2])-1]);
+        var match_pattern = indexOfMax(rowPattern)+1;
+        
+        var rowOccasion =  parseInt(occasionScore[parseInt(topnew[3])-1]);
+        var match_occasion = indexOfMax(rowOccasion)+1;
+        
+        var recommenditem = "",recommenditem3match = "";
+        var recommenditem2match1 = "",recommenditem2match2 = "",recommenditem2match3 = "";
+        var recommenditem1match = "";
+        var feat = "";
+        
+        console.log("Looking new match item for: "+top_or_pant);
+        
+        /*
+        * Goes through all pants and checks if there are 3 matches, 2 or just 1 (only color in this case)
+        */
+        if (top_or_pant=="top") {
+           for (var i = 0; i < pants.length; i++) {
+                var pant = pants[i];
+                if (parseInt(pant[1]) == parseInt(match_color) && parseInt(pant[2]) == parseInt(match_pattern) && parseInt(pant[3]) == parseInt(match_occasion)) {
+                    recommenditem3match = pant[0];
+                }
+                else if (parseInt(pant[1]) == parseInt(match_color) && parseInt(pant[2]) == parseInt(match_pattern)) {
+                    recommenditem2match1 = pant[0];
+                }
+                else if (parseInt(pant[1]) == parseInt(match_color) && parseInt(pant[3]) == parseInt(match_occasion)) {
+                    recommenditem2match2 = pant[0];
+                }
+                else if (parseInt(pant[2]) == parseInt(match_pattern) && parseInt(pant[3]) == parseInt(match_occasion)) {
+                    recommenditem2match3 = pant[0];
+                }
+                else if (parseInt(pant[1]) == parseInt(match_color)) {
+                    recommenditem1match = pant[0];
+                }
+            }
+            
+            /*console.log("is top "+recommenditem3match+" "+recommenditem2match1+" "+recommenditem2match2+" "+recommenditem2match3+" "+recommenditem1match);*/
+            
+            /*
+            * Now selects the recommendation with the highest number of matches
+            * In the case of two matches, goes to color+pattern first, then color+occassion, then pattern+occassion
+            */
+            if (recommenditem3match!="") {
+                recommenditem = recommenditem3match;
+                feat = 'color+pattern+occasion';
+            }
+            else if (recommenditem2match1!="") {
+                recommenditem = recommenditem2match1;
+                feat = 'color+pattern';
+            }
+            else if (recommenditem2match2!="") {
+                recommenditem = recommenditem2match2;
+                feat = 'color+occasion';
+            }
+            else if (recommenditem2match3!="") {
+                recommenditem = recommenditem2match3;
+                feat = 'pattern+occasion';
+            }
+            else if (recommenditem1match!="") {
+                recommenditem = recommenditem1match;
+                feat = 'color';
+            }
+        }
+        
+        if (top_or_pant=='pant') {
+           for (var i = 0; i < tops.length; i++) {
+                var top = tops[i];
+                if (parseInt(top[1]) == parseInt(match_color) && parseInt(top[2]) == parseInt(match_pattern) && parseInt(top[3]) == parseInt(match_occasion)) {
+                    recommenditem3match = top[0];
+                }
+                else if (parseInt(top[1]) == parseInt(match_color) && parseInt(top[2]) == parseInt(match_pattern)) {
+                    recommenditem2match1 = top[0];
+                }
+                else if (parseInt(top[1]) == parseInt(match_color) && parseInt(top[3]) == parseInt(match_occasion)) {
+                    recommenditem2match2 = top[0];
+                }
+                else if (parseInt(top[2]) == parseInt(match_pattern) && parseInt(top[3]) == parseInt(match_occasion)) {
+                    recommenditem2match3 = top[0];
+                }
+                else if (parseInt(top[1]) == parseInt(match_color)) {
+                    recommenditem1match = top[0];
+                }
+            }
+            
+            /*console.log("is pant "+recommenditem3match+" - "+recommenditem2match1+" - "+recommenditem2match2+" - "+recommenditem2match3+" - "+recommenditem1match);*/
+            
+            /*
+            * Now selects the recommendation with the highest number of matches
+            * In the case of two matches, goes to color+pattern first, then color+occassion, then pattern+occassion
+            */
+            if (recommenditem3match!="") {
+                recommenditem = recommenditem3match;
+                feat = 'color+pattern+occasion';
+            }
+            else if (recommenditem2match1!="") {
+                recommenditem = recommenditem2match1;
+                feat = 'color+pattern';
+            }
+            else if (recommenditem2match2!="") {
+                recommenditem = recommenditem2match2;
+                feat = 'color+occasion';
+            }
+            else if (recommenditem2match3!="") {
+                recommenditem = recommenditem2match3;
+                feat = 'pattern+occasion';
+            }
+            else if (recommenditem1match!="") {
+                recommenditem = recommenditem1match;
+                feat = 'color';
+            }
+        }
+        
+        return recommenditem;
+        
+        
+        
+    }
+    
+    /*
+    * Ads a point to the matchDict
+    */
+    function rewardMatchDict(match) {
+        if (!matchDict.hasOwnProperty(match.toString()))
+            matchDict[match.toString()] = 1;
+        else 
+            matchDict[match.toString()] += 1;
+        console.log(matchDict)
+    }
+    
+    /*
+    * Adds a point to the feature
+    */
+    function rewardFeature(topid,pantid) {
+        var topxx = topsids[topid];
+        var pantxx = pantsids[pantid];
+        
+        patternScore[topxx[2]-1][pantxx[2]-1] += 1;
+        colorScore[topxx[1]-1][pantxx[1]-1] += 1;
+        occasionScore[topxx[3]-1][pantxx[3]-1] += 1;
+    }
+    
+    /*
+    * Main thread (when people click like or dislike button, it comes here
+    */
+    function selectn(like) {
+        recordselection.push(like);
+        var topID = $("#topim").attr("data-idn");
+        var pantID = $("#pantim").attr("data-idn");
+        if (like) {
+            rewardMatchDict(topID+"+"+pantID);
+            rewardFeature(topID,pantID);
+            lastlikedtop = topID;
+            lastlikepant = pantID;
+        }
+        
+        counter++;
+        
+        /*
+        * This does the recommendation based on last like
+        */
+        /*if (counter % 3 === 0 && lastlikedtop != "") {
+            recommend(lastlikedtop, lastlikepant);
+            lastlikedtop = "";
+            lastlikepant = "";
+        }*/
+        /*
+        * This does the recommendation based on probability
+        */
+        /*if (counter % 3 === 0) {
+            var rec = recommendbasedonprob();
+            if (rec!="") {
+                var res = rec.split("+");
+                $("#topim").attr("src","clothes2/"+res[0]+".jpg");
+                $("#topim").attr("data-idn",res[0]);
+                $("#pantim").attr("src","clothes2/"+res[1]+".jpg");
+                $("#pantim").attr("data-idn",res[1]);
+            }
+            else 
+                dorandom();
+        }*/
+        /*
+        * This does the recommendation for new item
+        * gets a random item and recommends based on it
+        */
+        if (counter % 3 === 0) {
+            var newitem = dorandomitem();
+            console.log("Recommend based on new");
+            //get info of new selection 
+            if (newitem[0]==1) {
+                var topxx = topsids[newitem[1]];
+                var rec = recommendbasedonnew(topxx,"top");
+                if (rec!="") {
+                    $("#topim").attr("src","clothes2/"+newitem[1]+".jpg");
+                    $("#topim").attr("data-idn",newitem[1]);
+                    $("#pantim").attr("src","clothes2/"+rec+".jpg");
+                    $("#pantim").attr("data-idn",rec);
+                    console.log("Recommend "+newitem[1]+" has a new pant "+rec);
+                }
+                else
+                    dorandom();
+            }
+            else {
+                var pantxx = pantsids[newitem[1]];
+                var rec = recommendbasedonnew(pantxx,"pant");
+                if (rec=="") {
+                    $("#topim").attr("src","clothes2/"+rec+".jpg");
+                    $("#topim").attr("data-idn",rec);
+                    $("#pantim").attr("src","clothes2/"+newitem[1]+".jpg");
+                    $("#pantim").attr("data-idn",newitem[1]);
+                    console.log("Recommend "+newitem[1]+" has a new top "+rec);
+                }
+                else
+                    dorandom();
+            }
+            
+        }
+        else
+            dorandom();
+            
+        
+    }
+    
+    function endtest() {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
+        
+        //Write all on a file
+    }
+  
+  </script>
+</body>
+</html>
