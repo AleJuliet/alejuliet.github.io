@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="style.css?v=1.0">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script type="text/javascript" src="d3/d3.js"></script> 
+  
 
 </head>
 
@@ -34,8 +35,11 @@
             </div>
         </div>
         
-        <div id="end">
-            <button type="button" onclick="endtest()" class="btn btn-success">End Test</button>
+        <div id="end" style="margin-top:30px;">
+            <button id="stop" type="button" onclick="endtest()" class="btn btn-success">End Test</button>
+        </div>
+        
+        <div id="end2" style="margin-top:5px;margin-bottom:30px;">
         </div>
      </div>
     </div>
@@ -456,6 +460,9 @@
     * Main thread (when people click like or dislike button, it comes here
     */
     function selectn(like) {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
+    
         recordselection.push(like);
         var topID = $("#topim").attr("data-idn");
         var pantID = $("#pantim").attr("data-idn");
@@ -530,6 +537,8 @@
         else
             dorandom();
             
+        $('#dontlike').prop('disabled', false);
+        $('#melike').prop('disabled', false);
         
     }
     
@@ -538,6 +547,20 @@
         $('#melike').prop('disabled', true);
         
         //Write all on a file
+        //var obj = JSON.parse(json);
+        //download(, "resulttest.json","json");
+//         for (i = 0; i < recordselection.length; i++) {
+//             
+//         }
+        exportJson();
+    }
+    
+    function exportJson() {
+        var obj = {};
+        obj["user"] = recordselection;
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+
+        $('<a href="data:' + data + '" download="data.json">Download Results</a>').appendTo('#end2');
     }
   
   </script>

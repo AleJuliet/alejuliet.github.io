@@ -33,6 +33,13 @@
             <button type="button" onclick="selectn(1)" class="btn btn-success">I like it</button>
             </div>
         </div>
+        
+        <div id="end" style="margin-top:30px;">
+            <button id="stop" type="button" onclick="endtest()" class="btn btn-success">End Test</button>
+        </div>
+        
+        <div id="end2" style="margin-top:5px;margin-bottom:30px;">
+        </div>
      </div>
     </div>
 
@@ -80,8 +87,33 @@
     }
     
     function selectn(like) {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
         recordselection.push(like);
         dorandom();
+        $('#dontlike').prop('enabled', true);
+        $('#melike').prop('enabled', true);
+    }
+    
+    function endtest() {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
+        
+        //Write all on a file
+        //var obj = JSON.parse(json);
+        //download(, "resulttest.json","json");
+//         for (i = 0; i < recordselection.length; i++) {
+//             
+//         }
+        exportJson();
+    }
+    
+    function exportJson() {
+        var obj = {};
+        obj["user"] = recordselection;
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+
+        $('<a href="data:' + data + '" download="data.json">Download Results</a>').appendTo('#end2');
     }
   
   </script>
