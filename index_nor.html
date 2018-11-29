@@ -18,7 +18,8 @@
 <body>
    <div id="container" style="text-align:center;margin-top:30px">
     <div id="container2" style="width:50%;margin-left: 25%;margin-right: 2%;">
-        <h5>Please select the outfits you like</h5>
+        <div>Imagine you are waking up early in the morning, trying to pick up an outfit for today.
+Now you open this website, and you have boooom! A recommendation from our intelligent app</div>
         
         
         <div class="row">
@@ -31,9 +32,10 @@
                 </div>
             </div>
             <div class="col-sm-4" style="margin-top:30px">
-                <div>I don't like it:</div>
-                <div>I like it:</div>
-                <div>Skip:</div>
+                <div>.</div>
+                <div style="font-size:12px"><b>I don't like it:</b>  Please! This is horrible, I would never wear this</div>
+                <div style="font-size:12px"><b>I like it:</b> I would like to wear it today!</div>
+                <div style="font-size:12px"><b>Skip:</b>  It seems an ok match to me, but maybe not for today.</div>
             </div>
         </div>
         
@@ -75,9 +77,10 @@
     var lastlikedtop = "";
     var lastlikepant = "";
     //patternScore = zeros((5,5));
-    patternScore = zeros([5,5]);
-    colorScore = zeros([8,8]);
-    occasionScore = zeros([2,2]);
+    patternScore = zeros([6,6]);
+    colorScore = zeros([9,9]);
+    occasionScore = zeros([3,3]);
+    
     
     
     var recordselection = [];
@@ -85,7 +88,7 @@
     var currentmethod = "";
     var blacklist = [];
     counterallliked = 0;
-    path ="clothes2/";
+    path ="ImageDatasetLady/";
     $('#stop').prop('disabled', true);
     
     
@@ -94,7 +97,7 @@
     * topsids is a dictionary that contains "iditem" -> "arrayofelementsoftop"
     * pantsids is a dictionary that contains "iditem" -> "arrayofelementsofpant"
     */
-    d3.csv("4-Huayu-CSV.csv", function(data) {
+    d3.csv("website-woman.csv", function(data) {
         data.forEach(function(d) {
             if (d.type=="1") {
                 tops.push([d.index,d.color,d.pattern,d.occasion])
@@ -681,8 +684,6 @@
 
         $('<a href="data:' + data + '" download="data.json">Download results</a>').appendTo('#end2');
     }
-    
-    
   
   </script>
 </body>
