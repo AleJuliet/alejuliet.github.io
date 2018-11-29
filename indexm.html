@@ -1,0 +1,157 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>The HTML5 Herald</title>
+  <meta name="description" content="The HTML5 Herald">
+  <meta name="author" content="SitePoint">
+  <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link rel="stylesheet" href="style.css?v=1.0">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="d3/d3.js"></script> 
+
+</head>
+
+<body>
+   <div id="container" style="text-align:center;margin-top:30px">
+    <div id="container2" style="width:50%;margin-left: 25%;margin-right: 2%;">
+        <div>Imagine you are waking up early in the morning, trying to pick up an outfit for today.
+Now you open this website, and you have boooom! A recommendation from our intelligent app<br>
+Note: we know this are not your clothes, and that your taste may be different, but just from a general point of view :)</div>
+        
+        
+        <div class="row">
+            <div class="col-sm-8" style="text-align:right">
+                <div id="top" style="margin-top:20px">
+                    <img id="topim" src="" data-idn="" height="200">
+                </div>
+                <div id="pants">
+                    <img id="pantim" src="" data-idn="" height="200">
+                </div>
+            </div>
+            <div class="col-sm-4" style="margin-top:30px">
+                <div>.</div>
+                <div style="font-size:12px"><b>I don't like it:</b>  Please! This is horrible, I would never wear this</div>
+                <div style="font-size:12px"><b>I like it:</b> I would like to wear it today!</div>
+                <div style="font-size:12px"><b>Skip:</b>  It seems an ok match to me, but maybe not for today.</div>
+            </div>
+        </div>
+        
+        <div class="row" style="margin-top:30px">
+            <div class="col-sm" style="text-align:right">
+            <button id="dontlike" type="button" onclick="selectn(0)" class="btn btn-danger">I don't like it</button>
+            </div>
+            <div class="col-sm" style="text-align:center">
+            <button id="melike" type="button" onclick="selectn(1)" class="btn btn-success">I like it</button>
+            </div>
+            <div class="col-sm" style="text-align:left">
+            <button id="meskip" type="button" onclick="selectn(2)" class="btn btn-info">Skip</button>
+            </div>
+        </div>
+        
+        <div id="end" style="margin-top:30px;">
+            <button id="stop" type="button" onclick="endtest()" class="btn btn-success">End Test</button>
+        </div>
+        
+        <div id="end2" style="margin-top:5px;margin-bottom:30px;">
+        </div>
+     </div>
+    </div>
+
+  <script>
+    /*Load data*/
+    var tops = [];
+    var pants = [];
+    
+    var recordselection = [];
+    var counter = 0;
+    var counterallliked = 0;
+    path ="ImageDatasetMan/";
+    
+    d3.csv("website-man.csv", function(data) {
+        data.forEach(function(d) {
+            if (d.type=="1")
+                tops.push([d.index,d.color,d.pattern,d.occasion])
+            else 
+                pants.push([d.index,d.color,d.pattern,d.occasion])
+        });
+        console.log(tops);
+        dorandom(tops,pants);
+    });
+    
+    /**
+    * Shuffles array in place.
+    * @param {Array} a items An array containing the items.
+    */
+    function shuffle(a) {
+        var j, x, i;
+        for (i = a.length - 1; i > 0; i--) {
+            j = Math.floor(Math.random() * (i + 1));
+            x = a[i];
+            a[i] = a[j];
+            a[j] = x;
+        }
+        return a;
+    }
+    
+    function dorandom() {
+        tops = shuffle(tops);
+        pants = shuffle(pants);
+        var topID = tops[0][0];
+        var pantID = pants[0][0];
+        $("#topim").attr("src",path+topID+".jpg");
+        $("#pantim").attr("src",path+pantID+".jpg");
+        console.log(topID+" and "+pantID);
+    }
+    
+    function selectn(like) {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
+        $('#meskip').prop('disabled', true);
+        
+        if (counterallliked==50) {
+            $('#dontlike').prop('disabled', true);
+            $('#melike').prop('disabled', true);
+            $('#meskip').prop('disabled', true);
+            $('#stop').prop('disabled', false);
+            return;
+         }
+         
+         counterallliked++;
+         
+        recordselection.push(like);
+        dorandom();
+        $('#dontlike').prop('disabled', false);
+        $('#melike').prop('disabled', false);
+        $('#meskip').prop('disabled', false);
+    }
+    
+    function endtest() {
+        $('#dontlike').prop('disabled', true);
+        $('#melike').prop('disabled', true);
+        
+        
+        
+        //Write all on a file
+        //var obj = JSON.parse(json);
+        //download(, "resulttest.json","json");
+//         for (i = 0; i < recordselection.length; i++) {
+//             
+//         }
+
+        exportJson();
+    }
+    
+    function exportJson() {
+        var obj = {};
+        obj["user"] = recordselection;
+        var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
+
+        $('<a href="data:' + data + '" download="data.json">Download Results</a>').appendTo('#end2');
+    }
+  
+  </script>
+</body>
+</html>
