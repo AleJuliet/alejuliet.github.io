@@ -68,9 +68,9 @@ Note: we know this are not your clothes, and that your taste may be different, b
     var recordselection = [];
     var counter = 0;
     var counterallliked = 0;
-    path ="ImageDatasetLady/";
+    path ="ImageDatasetMan/";
     
-    d3.csv("website-woman.csv", function(data) {
+    d3.csv("website-man.csv", function(data) {
         data.forEach(function(d) {
             if (d.type=="1")
                 tops.push([d.index,d.color,d.pattern,d.occasion])
