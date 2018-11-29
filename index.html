@@ -17,20 +17,37 @@
 <body>
    <div id="container" style="text-align:center;margin-top:30px">
     <div id="container2" style="width:50%;margin-left: 25%;margin-right: 2%;">
-        <h5>Please select the outfits you like</h5>
-        <div id="top" style="margin-top:20px">
-            <img id="topim" src=""  height="200">
-        </div>
-        <div id="pants">
-            <img id="pantim" src=""  height="200">
+        <div>Imagine you are waking up early in the morning, trying to pick up an outfit for today.
+Now you open this website, and you have boooom! A recommendation from our intelligent app<br>
+Note: we know this are not your clothes, and that your taste may be different, but just from a general point of view :)</div>
+        
+        
+        <div class="row">
+            <div class="col-sm-8" style="text-align:right">
+                <div id="top" style="margin-top:20px">
+                    <img id="topim" src="" data-idn="" height="200">
+                </div>
+                <div id="pants">
+                    <img id="pantim" src="" data-idn="" height="200">
+                </div>
+            </div>
+            <div class="col-sm-4" style="margin-top:30px">
+                <div>.</div>
+                <div style="font-size:12px"><b>I don't like it:</b>  Please! This is horrible, I would never wear this</div>
+                <div style="font-size:12px"><b>I like it:</b> I would like to wear it today!</div>
+                <div style="font-size:12px"><b>Skip:</b>  It seems an ok match to me, but maybe not for today.</div>
+            </div>
         </div>
         
         <div class="row" style="margin-top:30px">
             <div class="col-sm" style="text-align:right">
-            <button type="button" onclick="selectn(0)" class="btn btn-danger">I don't like it</button>
+            <button id="dontlike" type="button" onclick="selectn(0)" class="btn btn-danger">I don't like it</button>
+            </div>
+            <div class="col-sm" style="text-align:center">
+            <button id="melike" type="button" onclick="selectn(1)" class="btn btn-success">I like it</button>
             </div>
             <div class="col-sm" style="text-align:left">
-            <button type="button" onclick="selectn(1)" class="btn btn-success">I like it</button>
+            <button id="meskip" type="button" onclick="selectn(2)" class="btn btn-info">Skip</button>
             </div>
         </div>
         
@@ -48,7 +65,9 @@
     var tops = [];
     var pants = [];
     
-    var recordselection = []
+    var recordselection = [];
+    var counter = 0;
+    var counterallliked = 0;
     
     d3.csv("4-Huayu-CSV.csv", function(data) {
         data.forEach(function(d) {
@@ -89,15 +108,30 @@
     function selectn(like) {
         $('#dontlike').prop('disabled', true);
         $('#melike').prop('disabled', true);
+        $('#meskip').prop('disabled', true);
+        
+        if (counterallliked==50) {
+            $('#dontlike').prop('disabled', true);
+            $('#melike').prop('disabled', true);
+            $('#meskip').prop('disabled', true);
+            $('#stop').prop('disabled', false);
+            return;
+         }
+         
+         counterallliked++;
+         
         recordselection.push(like);
         dorandom();
-        $('#dontlike').prop('enabled', true);
-        $('#melike').prop('enabled', true);
+        $('#dontlike').prop('disabled', false);
+        $('#melike').prop('disabled', false);
+        $('#meskip').prop('disabled', false);
     }
     
     function endtest() {
         $('#dontlike').prop('disabled', true);
         $('#melike').prop('disabled', true);
+        
+        
         
         //Write all on a file
         //var obj = JSON.parse(json);
@@ -105,6 +139,7 @@
 //         for (i = 0; i < recordselection.length; i++) {
 //             
 //         }
+
         exportJson();
     }
     
@@ -113,7 +148,7 @@
         obj["user"] = recordselection;
         var data = "text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
 
-        $('<a href="data:' + data + '" download="data.json">Download Results</a>').appendTo('#end2');
+        $('<a href="data:' + data + '" download="data.json">Download results</a>').appendTo('#end2');
     }
   
   </script>
