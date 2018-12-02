@@ -89,7 +89,7 @@ Now you open this website, and you have boooom! A recommendation from our intell
     var currentmethod = "";
     var blacklist = [];
     counterallliked = 0;
-    path ="ImageDatasetMan/";
+    path ="ImageDatasetLady/";
     $('#stop').prop('disabled', true);
     
     
@@ -98,7 +98,7 @@ Now you open this website, and you have boooom! A recommendation from our intell
     * topsids is a dictionary that contains "iditem" -> "arrayofelementsoftop"
     * pantsids is a dictionary that contains "iditem" -> "arrayofelementsofpant"
     */
-    d3.csv("website-man.csv", function(data) {
+    d3.csv("website-woman.csv", function(data) {
         data.forEach(function(d) {
             if (d.type=="1") {
                 tops.push([d.index,d.color,d.pattern,d.occasion])
