@@ -1,6 +1,10 @@
 # DressMe Testing Content based algorithm
 
-Thid project contains different scripts that implement a simple version of a Content based recommendation algorithm, to recomend diferent outfits to users. The idea is that outfits will be displayed based on users selection (therefore, it "learns" from it). The results are exported in a Json file, which is then later used to compare them against random recommendations.
+This is part of the project developed for the course Advance Project from the Technical University of Denmark (DTU). 
+
+This project contains different scripts that implement a simple version of a Content based recommendation algorithm, to recomend diferent outfits to users. The idea is that outfits will be displayed based on users selection (therefore, it "learns" from it). The results are exported in a Json file, which is then later used to compare them against random recommendations.
+
+This was implemented on Nov 2018.
 
 The code was implemented in Javascript.
 
