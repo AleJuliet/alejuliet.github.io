@@ -148,7 +148,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
                 }
                 outfitsscore[top[0].toString()+"+"+pant[0].toString()] =arrayfeat;
             }
-            //console.log(outfitsscore);
         //outfitsscore = zeros([totalout,162]);
         dorandom(tops,pants);
         
@@ -226,7 +225,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
         $("#topim").attr("data-idn",topID);
         $("#pantim").attr("src",path+pantID+".jpg");
         $("#pantim").attr("data-idn",pantID);
-        console.log(topID+" and "+pantID);
     }
         
     /*
@@ -345,29 +343,10 @@ Now you open this website, and you have boooom! A recommendation from our intell
             recomID_pant = getRndmFromSet(allmatches2o);
             featured2 = "ocassion:";
             }
-            
-//         if (allmatches2c.length==0)
-//             if (allmatches2p.length==0)
-//                 if (allmatches2o.length==0) {
-//                     recomID_pant = ""
-//                     }
-//                 else {
-//                     featured2 = "occassion";
-//                     recomID_pant = getRndmFromSet(allmatches2o);
-//                 }
-//             else {
-//                 featured2 = "pattern";
-//                 recomID_pant = getRndmFromSet(allmatches2p);
-//             }
-//         else {
-//             featured2 = "color";
-//             recomID_pant = getRndmFromSet(allmatches2c);
-//         }
         
         toppant = recomID_top+"+"+recomID_pant;
         if (blacklist.includes(toppant) && ( recomID_pant == "" || recomID_top == "")) {
             dorandom();
-            console.log("Recommend: Did random");
             randomornot.push("R");
         }
         else {
@@ -375,13 +354,11 @@ Now you open this website, and you have boooom! A recommendation from our intell
             $("#topim").attr("data-idn",recomID_top);
             $("#pantim").attr("src",path+recomID_pant+".jpg");
             $("#pantim").attr("data-idn",recomID_pant);
-            console.log("Recommend: not random -"+featured+" - "+featured2);
             randomornot.push("B");
         }
         }
         else {
             dorandom();
-            console.log("Recommend: Did random");
             randomornot.push("R");
         }
         
@@ -441,8 +418,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
         var recommenditem1match = "";
         var feat = "";
         
-        //console.log("Looking new match item for: "+top_or_pant);
-        
         
         /*
         * Goes through all pants and checks if there are 3 matches, 2 or just 1 (only color in this case)
@@ -477,7 +452,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
                 }
             }
             
-            /*console.log("is top "+recommenditem3match+" "+recommenditem2match1+" "+recommenditem2match2+" "+recommenditem2match3+" "+recommenditem1match);*/
             
             /*
             * Now selects the recommendation with the highest number of matches
@@ -542,7 +516,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
                 }
             }
             
-            /*console.log("is pant "+recommenditem3match+" - "+recommenditem2match1+" - "+recommenditem2match2+" - "+recommenditem2match3+" - "+recommenditem1match);*/
             
             /*
             * Now selects the recommendation with the highest number of matches
@@ -570,7 +543,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
             }
         }
         
-        console.log("Recommended base don "+feat);
         return recommenditem;
         
         
@@ -617,7 +589,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
         
         if (blacklist.includes(getmay) && ( getmay === undefined || getmay == "")) {
             dorandom();
-            console.log("Recommend: Did random");
             randomornot.push("R");
         }
         else {
@@ -626,7 +597,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
             $("#topim").attr("data-idn",res[0]);
             $("#pantim").attr("src",path+res[1]+".jpg");
             $("#pantim").attr("data-idn",res[1]);
-            console.log("Recommend: not random -"+getmay);
             randomornot.push("N");
         }
         
@@ -696,7 +666,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
             var rec = recommendbasedonprob();
             if (rec!="") {
                 var res = rec.split("+");
-                console.log("Based on prob "+res[0]+" - "+res[1]);
                 $("#topim").attr("src",path+res[0]+".jpg");
                 $("#topim").attr("data-idn",res[0]);
                 $("#pantim").attr("src",path+res[1]+".jpg");
@@ -721,7 +690,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
                     $("#topim").attr("data-idn",newitem[1]);
                     $("#pantim").attr("src",path+rec+".jpg");
                     $("#pantim").attr("data-idn",rec);
-                    console.log("Recommend "+newitem[1]+" has a new pant "+rec);
                 }
                 else
                     dorandom();
@@ -735,7 +703,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
                     $("#topim").attr("data-idn",rec);
                     $("#pantim").attr("src",path+newitem[1]+".jpg");
                     $("#pantim").attr("data-idn",newitem[1]);
-                    console.log("Recommend "+newitem[1]+" has a new top "+rec);
                 }
                 else {
                     dorandom();
@@ -746,7 +713,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
         else if (like==1) {
             //recommend(lastlikedtop, lastlikepant);
             var res7 = calculatesimilaritie(lastlikedtop+"+"+lastlikepant);
-            console.log("Result is "+res7);
             lastlikedtop = "";
             lastlikepant = "";
         }
@@ -762,12 +728,6 @@ Now you open this website, and you have boooom! A recommendation from our intell
         $('#dontlike').prop('disabled', true);
         $('#melike').prop('disabled', true);
         
-        //Write all on a file
-        //var obj = JSON.parse(json);
-        //download(, "resulttest.json","json");
-//         for (i = 0; i < recordselection.length; i++) {
-//             
-//         }
         exportJson();
     }
     
